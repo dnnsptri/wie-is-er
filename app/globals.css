@@ -28,7 +28,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid #805400; outline-
 h1 {
   margin: 0 0 22px;
   text-align: center;
-  font-size: clamp(26px, 8.85vw, 43px);
+  font-size: clamp(26px, 8.85vw, 45px);
   line-height: 1.02;
   letter-spacing: -.05em;
   font-weight: 825;
@@ -277,7 +277,7 @@ fieldset input { width: 20px; height: 20px; accent-color: #785300; }
   }
   h1 {
     margin-bottom: 14px;
-    font-size: clamp(25px, 7.8vw, 32px);
+    font-size: clamp(26px, 8.3vw, 34px);
     line-height: 1.06;
   }
   .availability {

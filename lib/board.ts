@@ -35,6 +35,8 @@ const officeClock = new Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
   month: '2-digit',
   day: '2-digit',
+  hour: '2-digit',
+  hourCycle: 'h23',
 });
 
 export const fullDate = new Intl.DateTimeFormat('nl-NL', {
@@ -57,17 +59,18 @@ export function addDays(date: string, days: number) {
 export function calendar(now = new Date()) {
   const parts = Object.fromEntries(officeClock.formatToParts(now).map(({ type, value }) => [type, value]));
   const today = `${parts.year}-${parts.month}-${parts.day}`;
+  const boardDate = Number(parts.hour) >= 19 ? addDays(today, 1) : today;
   const days: Array<(typeof workdays)[number] & { date: string }> = [];
   for (let offset = 0; days.length < workdays.length; offset += 1) {
-    const date = addDays(today, offset);
+    const date = addDays(boardDate, offset);
     const weekday = workdays[dateAtUtc(date).getUTCDay() - 1];
     if (weekday) days.push({ ...weekday, date });
   }
-  return { today, days };
+  return { today, boardDate, days };
 }
 
 export function canSelect(date: string, office: ReturnType<typeof calendar>) {
-  return date === office.today || office.days.some((day) => day.date === date);
+  return date === office.boardDate || office.days.some((day) => day.date === date);
 }
 
 export function scheduleFor(data: BoardData, person: Person, date: string): RegularSchedule | null {

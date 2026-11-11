@@ -74,12 +74,12 @@ export async function POST(request: Request) {
       }
       return json(await updateBoard((data) => {
         const history = data.schedules[person.id] ?? [];
-        const previousMonday = scheduleFor(data, person, office.today)?.alternateMonday;
+        const previousMonday = scheduleFor(data, person, office.boardDate)?.alternateMonday;
         const alternateMonday = days.includes(1) ? undefined
           : requestedMonday === undefined ? previousMonday : requestedMonday ?? undefined;
         data.schedules[person.id] = [
-          ...history.filter(({ from }) => from < office.today),
-          { from: office.today, days, alternateMonday },
+          ...history.filter(({ from }) => from < office.boardDate),
+          { from: office.boardDate, days, alternateMonday },
         ];
       }));
     }

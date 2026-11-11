@@ -18,10 +18,12 @@ export default function AttendanceBoard({
   initialCalendar,
   initialData,
   personalId,
+  bannerAngle,
 }: {
   initialCalendar: ReturnType<typeof calendar>;
   initialData: BoardData | null;
   personalId?: PersonId;
+  bannerAngle: number;
 }) {
   const [office, setOffice] = useState(initialCalendar);
   const [selection, setSelection] = useState<string | null>(null);
@@ -55,7 +57,7 @@ export default function AttendanceBoard({
     const updateClock = () => {
       const current = calendar();
       setOffice((previous) => (
-        previous.today === current.today
+        previous.today === current.today && previous.boardDate === current.boardDate
           ? previous
           : current
       ));
@@ -65,38 +67,41 @@ export default function AttendanceBoard({
       updateClock();
       void refresh();
     };
+    let timer: number;
+    const tick = () => {
+      updateClock();
+      timer = window.setTimeout(tick, 60_000 - Date.now() % 60_000);
+    };
     readLink();
-    updateClock();
+    tick();
     if (!initialData) void refresh();
-    const timer = window.setInterval(updateClock, 15_000);
     window.addEventListener('hashchange', readLink);
     window.addEventListener('focus', onFocus);
     document.addEventListener('visibilitychange', onFocus);
     return () => {
-      window.clearInterval(timer);
+      window.clearTimeout(timer);
       window.removeEventListener('hashchange', readLink);
       window.removeEventListener('focus', onFocus);
       document.removeEventListener('visibilitychange', onFocus);
     };
   }, [initialData, refresh]);
 
-  const date = selection && canSelect(selection, office) ? selection : office.today;
+  const date = selection && canSelect(selection, office) ? selection : office.boardDate;
   const isToday = date === office.today;
   const dayLabel = isToday ? 'Vandaag' : date === addDays(office.today, 1)
     ? 'Morgen' : weekdayName.format(dateAtUtc(date)).replace(/^./, (initial) => initial.toUpperCase());
-  const todayIsWeekend = office.days[0].date !== office.today;
+  const boardDateIsWeekend = office.days[0].date !== office.boardDate;
   const dateLabel = fullDate.format(dateAtUtc(date));
   const roster = rosterFor(data ?? emptyBoard, date);
   const expected = roster.filter(({ present }) => present).length;
   const provisional = roster.some(({ unknown }) => unknown);
   const free = Math.max(0, deskCount - expected);
-  const freeLabel = free === 0 ? 'geen vrije plek'
-    : free === 1 ? '1 plek vrij' : `${free} plekken vrij`;
+  const freeLabel = free === 1 ? '1 plek vrij' : `${free} plekken vrij`;
   const selected = roster.find(({ person }) => person.id === (personalId ?? personId));
   const attendanceLabel = selected?.present ? 'Ik ben er niet' : 'Ik ben er';
 
   function selectDate(nextDate: string) {
-    setSelection(nextDate === office.today ? null : nextDate);
+    setSelection(nextDate === office.boardDate ? null : nextDate);
     setError('');
     setNotice('');
     void refresh();
@@ -162,7 +167,7 @@ export default function AttendanceBoard({
 
   function openSchedule() {
     if (!selected || !data) return;
-    const schedule = scheduleFor(data, selected.person, office.today);
+    const schedule = scheduleFor(data, selected.person, office.boardDate);
     setScheduleDays([...(schedule?.days ?? [])]);
     setAlternateMonday(schedule?.alternateMonday ?? null);
     setScheduleError('');
@@ -173,11 +178,11 @@ export default function AttendanceBoard({
     <main className="board-shell">
       <h1>Wie is er?</h1>
 
-      <section className="availability"
+      <section className="availability" style={{ transform: `rotate(${bannerAngle}deg)` }}
         aria-label={data && provisional ? 'Voorlopige beschikbaarheid' : 'Beschikbaarheid'}
         aria-live="polite">
         {data ? (
-          <strong>{dayLabel} {freeLabel}</strong>
+          <strong>{dayLabel} {free === 0 ? <span className="no-desks">geen vrije plek</span> : freeLabel}</strong>
         ) : (
           <>
             <strong>Bord niet beschikbaar</strong>
@@ -215,9 +220,11 @@ export default function AttendanceBoard({
       </ul>
 
       <section className="controls" aria-label="Kies een dag en pas je aanwezigheid aan">
-        {todayIsWeekend && !isToday && (
+        {boardDateIsWeekend && date !== office.boardDate && (
           <div className="week-switch">
-            <button className="text-button" onClick={() => selectDate(office.today)}>Terug naar vandaag</button>
+            <button className="text-button" onClick={() => selectDate(office.boardDate)}>
+              Terug naar {office.boardDate === office.today ? 'vandaag' : 'morgen'}
+            </button>
           </div>
         )}
         <div className="weekdays" role="group" aria-label="Komende werkdagen">
@@ -278,8 +285,8 @@ export default function AttendanceBoard({
             <label>
               <input type="checkbox" checked={alternateMonday !== null} onChange={(event) => {
                 if (event.currentTarget.checked) {
-                  const weekday = dateAtUtc(office.today).getUTCDay();
-                  setAlternateMonday(addDays(office.today, (8 - weekday) % 7));
+                  const weekday = dateAtUtc(office.boardDate).getUTCDay();
+                  setAlternateMonday(addDays(office.boardDate, (8 - weekday) % 7));
                   setScheduleDays((previous) => previous.filter((day) => day !== 1));
                 } else {
                   setAlternateMonday(null);

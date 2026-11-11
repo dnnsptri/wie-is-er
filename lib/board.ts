@@ -13,7 +13,8 @@ export const people = [
 export type Person = (typeof people)[number];
 export type PersonId = Person['id'];
 
-type Schedule = { from: string; days: number[] };
+type RegularSchedule = { days: readonly number[]; alternateMonday?: string };
+type Schedule = RegularSchedule & { from: string };
 type Attendance = { present: boolean; savedAt: number };
 export type BoardData = {
   schedules: Partial<Record<PersonId, Schedule[]>>;
@@ -69,9 +70,20 @@ export function canSelect(date: string, office: ReturnType<typeof calendar>) {
   return date === office.today || office.days.some((day) => day.date === date);
 }
 
-export function scheduleFor(data: BoardData, person: Person, date: string): readonly number[] | null {
+export function scheduleFor(data: BoardData, person: Person, date: string): RegularSchedule | null {
   const version = data.schedules[person.id]?.findLast((schedule) => schedule.from <= date);
-  return version?.days ?? person.days;
+  return version ?? (person.days ? { days: person.days } : null);
+}
+
+export function regularAttendance(schedule: RegularSchedule | null, date: string): boolean | null {
+  if (!schedule) return null;
+  const officeDate = dateAtUtc(date);
+  const weekday = officeDate.getUTCDay();
+  if (schedule.days.includes(weekday)) return true;
+
+  const firstMonday = schedule.alternateMonday;
+  return weekday === 1 && Boolean(firstMonday && date >= firstMonday
+    && (officeDate.getTime() - dateAtUtc(firstMonday).getTime()) % (14 * 86_400_000) === 0);
 }
 
 export function attendanceKey(person: PersonId, date: string) {
@@ -79,14 +91,13 @@ export function attendanceKey(person: PersonId, date: string) {
 }
 
 export function rosterFor(data: BoardData, date: string) {
-  const day = dateAtUtc(date).getUTCDay();
   const roster = people.map((person) => {
     const schedule = scheduleFor(data, person, date);
-    const regular = schedule?.includes(day) ?? false;
+    const regular = regularAttendance(schedule, date);
     const entry = data.attendance[attendanceKey(person.id, date)];
     return {
       person,
-      present: entry?.present ?? regular,
+      present: entry?.present ?? regular ?? false,
       unknown: !entry && schedule === null,
       extraAt: entry?.present && !regular ? entry.savedAt : null,
       ghost: false,

@@ -1,4 +1,4 @@
-import { attendanceKey, calendar, canSelect, dateAtUtc, people, scheduleFor, workdays } from '@/lib/board';
+import { addDays, attendanceKey, calendar, canSelect, dateAtUtc, people, regularAttendance, scheduleFor, workdays } from '@/lib/board';
 import { readBoard, updateBoard } from '@/lib/store';
 
 function json(body: unknown, status = 200) {
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       const key = attendanceKey(person.id, date);
       return json(await updateBoard((data) => {
         const schedule = scheduleFor(data, person, date);
-        const regular = schedule?.includes(dateAtUtc(date).getUTCDay());
+        const regular = regularAttendance(schedule, date);
         if (regular === present) {
           delete data.attendance[key];
         } else if (data.attendance[key]?.present !== present) {
@@ -64,11 +64,22 @@ export async function POST(request: Request) {
         return json({ error: 'Kies je vaste werkdagen.' }, 400);
       }
       const days = [...new Set<number>(body.days)].sort((a, b) => a - b);
+      const requestedMonday: unknown = body.alternateMonday;
+      if (requestedMonday != null && (
+        typeof requestedMonday !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(requestedMonday)
+        || dateAtUtc(requestedMonday).getUTCDay() !== 1 || addDays(requestedMonday, 0) !== requestedMonday
+        || days.includes(1)
+      )) {
+        return json({ error: 'Kies een maandag als startdatum voor je tweewekelijkse ritme.' }, 400);
+      }
       return json(await updateBoard((data) => {
         const history = data.schedules[person.id] ?? [];
+        const previousMonday = scheduleFor(data, person, office.today)?.alternateMonday;
+        const alternateMonday = days.includes(1) ? undefined
+          : requestedMonday === undefined ? previousMonday : requestedMonday ?? undefined;
         data.schedules[person.id] = [
           ...history.filter(({ from }) => from < office.today),
-          { from: office.today, days },
+          { from: office.today, days, alternateMonday },
         ];
       }));
     }

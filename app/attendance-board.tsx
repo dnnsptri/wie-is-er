@@ -9,7 +9,7 @@ import {
 
 type Change =
   | { type: 'attendance'; person: PersonId; date: string; present: boolean }
-  | { type: 'schedule'; person: PersonId; days: number[] };
+  | { type: 'schedule'; person: PersonId; days: number[]; alternateMonday: string | null };
 
 const emptyBoard: BoardData = { schedules: {}, attendance: {} };
 const weekdayName = new Intl.DateTimeFormat('nl-NL', { weekday: 'long', timeZone: 'UTC' });
@@ -31,6 +31,7 @@ export default function AttendanceBoard({
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [scheduleDays, setScheduleDays] = useState<number[]>([]);
+  const [alternateMonday, setAlternateMonday] = useState<string | null>(null);
   const [scheduleError, setScheduleError] = useState('');
   const dialog = useRef<HTMLDialogElement>(null);
   const revision = useRef(0);
@@ -159,7 +160,9 @@ export default function AttendanceBoard({
 
   function openSchedule() {
     if (!selected || !data) return;
-    setScheduleDays([...(scheduleFor(data, selected.person, office.today) ?? [])]);
+    const schedule = scheduleFor(data, selected.person, office.today);
+    setScheduleDays([...(schedule?.days ?? [])]);
+    setAlternateMonday(schedule?.alternateMonday ?? null);
     setScheduleError('');
     dialog.current?.showModal();
   }
@@ -252,7 +255,7 @@ export default function AttendanceBoard({
         onCancel={(event) => { if (saving) event.preventDefault(); }}>
         <form onSubmit={(event) => {
           event.preventDefault();
-          if (selected) void save({ type: 'schedule', person: selected.person.id, days: scheduleDays });
+          if (selected) void save({ type: 'schedule', person: selected.person.id, days: scheduleDays, alternateMonday });
         }}>
           <h2 id="schedule-title">Vaste dagen</h2>
           <p>Op welke werkdagen is {selected?.person.name} meestal op kantoor?</p>
@@ -263,6 +266,7 @@ export default function AttendanceBoard({
                 <input type="checkbox" checked={scheduleDays.includes(day.number)}
                   onChange={(event) => {
                     const checked = event.currentTarget.checked;
+                    if (day.number === 1 && checked) setAlternateMonday(null);
                     setScheduleDays((previous) => checked
                       ? [...previous, day.number]
                       : previous.filter((number) => number !== day.number));
@@ -270,6 +274,25 @@ export default function AttendanceBoard({
                 {day.name}
               </label>
             ))}
+            <label>
+              <input type="checkbox" checked={alternateMonday !== null} onChange={(event) => {
+                if (event.currentTarget.checked) {
+                  const weekday = dateAtUtc(office.today).getUTCDay();
+                  setAlternateMonday(addDays(office.today, (8 - weekday) % 7));
+                  setScheduleDays((previous) => previous.filter((day) => day !== 1));
+                } else {
+                  setAlternateMonday(null);
+                }
+              }} />
+              Om de week op maandag
+            </label>
+            {alternateMonday !== null && (
+              <label className="schedule-start">
+                Vanaf
+                <input type="date" required value={alternateMonday}
+                  onChange={(event) => setAlternateMonday(event.currentTarget.value)} />
+              </label>
+            )}
           </fieldset>
           {scheduleError && <p className="error" role="alert">{scheduleError}</p>}
           <div className="dialog-actions">

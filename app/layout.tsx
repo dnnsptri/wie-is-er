@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from 'next';
 import '@fontsource-variable/geist';
 import './globals.css';
+import { boardDescription, boardTitle, shareMetadata } from '@/lib/share-metadata';
 
 export const metadata: Metadata = {
-  title: 'Wie is er vandaag bij Backspace',
-  description: 'Bekijk wie er op kantoor is en hoeveel bureaus er vrij zijn.',
+  metadataBase: new URL('https://wie-is-er.vercel.app'),
+  title: boardTitle,
+  description: boardDescription,
+  ...shareMetadata(),
   robots: { index: false, follow: false },
 };
 

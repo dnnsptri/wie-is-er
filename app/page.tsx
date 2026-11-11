@@ -1,14 +1,7 @@
-import AttendanceBoard from './attendance-board';
-import { calendar } from '@/lib/board';
-import { readBoard } from '@/lib/store';
+import BoardPage from './board-page';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Home() {
-  const office = calendar();
-  const data = await readBoard().catch((error: unknown) => {
-    console.error('Loading the board failed', error);
-    return null;
-  });
-  return <AttendanceBoard initialCalendar={office} initialData={data} />;
+export default function Home() {
+  return <BoardPage />;
 }

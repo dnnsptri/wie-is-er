@@ -17,9 +17,11 @@ const weekdayName = new Intl.DateTimeFormat('nl-NL', { weekday: 'long', timeZone
 export default function AttendanceBoard({
   initialCalendar,
   initialData,
+  personalId,
 }: {
   initialCalendar: ReturnType<typeof calendar>;
   initialData: BoardData | null;
+  personalId?: PersonId;
 }) {
   const [office, setOffice] = useState(initialCalendar);
   const [selection, setSelection] = useState<string | null>(null);
@@ -87,7 +89,7 @@ export default function AttendanceBoard({
   const expected = roster.filter(({ present }) => present).length;
   const provisional = roster.some(({ unknown }) => unknown);
   const free = Math.max(0, deskCount - expected);
-  const selected = roster.find(({ person }) => person.id === personId);
+  const selected = roster.find(({ person }) => person.id === (personalId ?? personId));
   const attendanceLabel = selected?.present ? 'Ik ben er niet' : 'Ik ben er';
 
   function selectDate(nextDate: string) {

@@ -82,14 +82,15 @@ export default function AttendanceBoard({
 
   const date = selection && canSelect(selection, office) ? selection : office.today;
   const isToday = date === office.today;
-  const dayWord = isToday ? 'vandaag' : date === addDays(office.today, 1)
-    ? 'morgen' : weekdayName.format(dateAtUtc(date));
+  const dayLabel = isToday ? 'Vandaag' : date === addDays(office.today, 1)
+    ? 'Morgen' : weekdayName.format(dateAtUtc(date)).replace(/^./, (initial) => initial.toUpperCase());
   const todayIsWeekend = office.days[0].date !== office.today;
   const dateLabel = fullDate.format(dateAtUtc(date));
   const roster = rosterFor(data ?? emptyBoard, date);
   const expected = roster.filter(({ present }) => present).length;
   const provisional = roster.some(({ unknown }) => unknown);
   const free = Math.max(0, deskCount - expected);
+  const freeLabel = free === 1 ? '1 plek vrij' : `${free} plekken vrij`;
   const selected = roster.find(({ person }) => person.id === (personalId ?? personId));
   const attendanceLabel = selected?.present ? 'Ik ben er niet' : 'Ik ben er';
 
@@ -169,13 +170,13 @@ export default function AttendanceBoard({
 
   return (
     <main className="board-shell">
-      <h1>Wie is er {dayWord}?</h1>
+      <h1>Wie is er?</h1>
 
       <section className="availability"
         aria-label={data && provisional ? 'Voorlopige beschikbaarheid' : 'Beschikbaarheid'}
         aria-live="polite">
         {data ? (
-          <strong>{free === 1 ? '1 plek vrij' : `${free} plekken vrij`}</strong>
+          <strong>{dayLabel} {freeLabel}</strong>
         ) : (
           <>
             <strong>Bord niet beschikbaar</strong>

@@ -3,7 +3,7 @@ import '@fontsource-variable/geist';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Wie is er?',
+  title: 'Wie is er vandaag bij Backspace',
   description: 'Bekijk wie er op kantoor is en hoeveel bureaus er vrij zijn.',
   robots: { index: false, follow: false },
 };

@@ -34,7 +34,6 @@ h1 {
   font-weight: 825;
   text-wrap: balance;
 }
-h1 span { display: block; }
 .availability {
   display: grid;
   justify-items: center;
@@ -226,6 +225,7 @@ h1 span { display: block; }
   font-weight: 850;
   letter-spacing: -.05em;
 }
+.attendance-button[aria-busy='true'] { opacity: 1; }
 .attendance-button:active { transform: translateY(1px); }
 .personal-prompt, .feedback, footer { text-align: center; font-size: 13px; }
 .feedback { margin: 8px 0 0; }
@@ -265,6 +265,45 @@ fieldset input { width: 20px; height: 20px; accent-color: #785300; }
 @media (min-width: 650px) {
   .board-shell { width: min(100%, 460px); }
 }
+@media (max-width: 600px) {
+  body {
+    background-image: linear-gradient(#fff4df96, #fff4df96), url('/paper-mobile.webp');
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+  .board-shell {
+    --mobile-board-width: min(100%, clamp(264px, 49svh, 336px));
+    padding: 18px 14px 20px;
+  }
+  h1 {
+    margin-bottom: 14px;
+    font-size: clamp(25px, 7.8vw, 32px);
+    line-height: 1.06;
+  }
+  .availability {
+    min-height: 44px;
+    padding: 6px clamp(20px, 6vw, 32px);
+  }
+  .availability strong { font-size: clamp(20px, 6vw, 25px); }
+  .portraits, .controls {
+    width: var(--mobile-board-width);
+    margin-inline: auto;
+  }
+  .portraits {
+    gap: 8px 6px;
+    margin-top: 14px;
+  }
+  .card { aspect-ratio: .94; }
+  .name { font-size: clamp(13px, 4vw, 17px); }
+  .controls { margin-top: 23px; }
+  .weekday { font-size: clamp(13px, 3.8vw, 16px); }
+  .attendance-button {
+    min-height: 48px;
+    margin-top: 8px;
+    font-size: clamp(22px, 6vw, 26px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .face, .fold { transition: none; }
 }

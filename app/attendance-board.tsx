@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  addDays, calendar, canSelect, dateAtUtc, deskCount, fullDate, people, rosterFor,
+  addDays, attendanceKey, calendar, canSelect, dateAtUtc, deskCount, fullDate, people, rosterFor,
   scheduleFor, workdays,
   type BoardData, type PersonId,
 } from '@/lib/board';
@@ -105,6 +105,17 @@ export default function AttendanceBoard({
     setError('');
     setScheduleError('');
     setNotice('');
+    const beforeSave = data;
+    if (change.type === 'attendance' && beforeSave) {
+      const key = attendanceKey(change.person, change.date);
+      setData({
+        ...beforeSave,
+        attendance: {
+          ...beforeSave.attendance,
+          [key]: { present: change.present, savedAt: Date.now() },
+        },
+      });
+    }
     try {
       const response = await fetch('/api/board', {
         method: 'POST',
@@ -127,8 +138,12 @@ export default function AttendanceBoard({
       const message = failure instanceof Error && failure.name === 'Error'
         ? failure.message
         : 'Opslaan is niet gelukt. Probeer het opnieuw.';
-      if (change.type === 'schedule') setScheduleError(message);
-      else setError(message);
+      if (change.type === 'schedule') {
+        setScheduleError(message);
+      } else {
+        setData(beforeSave);
+        setError(message);
+      }
     } finally {
       writing.current = false;
       setSaving(false);
@@ -149,7 +164,7 @@ export default function AttendanceBoard({
 
   return (
     <main className="board-shell">
-      <h1>Wie is er {dayWord} <span>bij Backspace?</span></h1>
+      <h1>Wie is er {dayWord}?</h1>
 
       <section className="availability"
         aria-label={data && provisional ? 'Voorlopige beschikbaarheid' : 'Beschikbaarheid'}
@@ -212,22 +227,23 @@ export default function AttendanceBoard({
         </div>
 
         {selected ? (
-          <button className="attendance-button" disabled={saving || !data} onClick={toggleAttendance}>
+          <button className="attendance-button" disabled={saving || !data} aria-busy={saving} onClick={toggleAttendance}>
             {attendanceLabel}
           </button>
         ) : (
           <p className="personal-prompt">Open je persoonlijke link om je aanwezigheid aan te passen.</p>
         )}
         {error && <p className="feedback error" role="alert">{error}</p>}
-        <p className="feedback" role="status" hidden={!notice}>{notice}</p>
+        <p className="visually-hidden" role="status">{notice}</p>
       </section>
 
-      <footer>
-        {selected && <button className="text-button" onClick={openSchedule} disabled={saving || !data}>
-          {selected.person.name} · Vaste dagen aanpassen
-        </button>}
-        <p>Wie het eerst komt …</p>
-      </footer>
+      {selected && (
+        <footer>
+          <button className="text-button" onClick={openSchedule} disabled={saving || !data}>
+            {selected.person.name} · Vaste dagen aanpassen
+          </button>
+        </footer>
+      )}
 
       <dialog ref={dialog} aria-labelledby="schedule-title"
         onCancel={(event) => { if (saving) event.preventDefault(); }}>

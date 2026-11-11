@@ -202,7 +202,6 @@ export default function AttendanceBoard({
               <span className="name">
                 {person.name}
                 {ghost && <span className="card-marker" aria-hidden="true">+1</span>}
-                {data && unconfirmed && <span className="card-marker" aria-hidden="true">?</span>}
               </span>
               {person.id === selected?.person.id && (
                 <button type="button" className="card-toggle" disabled={saving || !data}

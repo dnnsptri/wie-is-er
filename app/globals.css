@@ -230,8 +230,8 @@ h1 {
 .personal-prompt, .feedback, footer { text-align: center; font-size: 13px; }
 .feedback { margin: 8px 0 0; }
 .error { color: #8d2418; }
-footer { margin-top: 14px; }
-footer p { margin: 4px 0 0; }
+footer { margin-top: 10px; font-weight: 650; }
+footer .text-button { min-height: 44px; padding-inline: 0; }
 .text-button {
   min-height: 32px;
   padding: 2px 4px;

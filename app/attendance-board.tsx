@@ -239,8 +239,9 @@ export default function AttendanceBoard({
 
       {selected && (
         <footer>
-          <button className="text-button" onClick={openSchedule} disabled={saving || !data}>
-            {selected.person.name} · Vaste dagen aanpassen
+          <span>{selected.person.name} · </span>
+          <button type="button" className="text-button" onClick={openSchedule} disabled={saving || !data}>
+            Vaste dagen aanpassen
           </button>
         </footer>
       )}

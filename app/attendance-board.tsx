@@ -14,16 +14,25 @@ type Change =
 const emptyBoard: BoardData = { schedules: {}, attendance: {} };
 const weekdayName = new Intl.DateTimeFormat('nl-NL', { weekday: 'long', timeZone: 'UTC' });
 
+function bannerTilt(date: string) {
+  // The date keeps the tilt consistent across reloads and devices.
+  let hash = 2166136261;
+  for (const character of date) {
+    hash = Math.imul(hash ^ character.charCodeAt(0), 16777619);
+  }
+  const sample = (hash ^ (hash >>> 16)) >>> 0;
+  const degrees = (100 + (sample >>> 1) % 151) / 100;
+  return sample % 2 === 0 ? degrees : -degrees;
+}
+
 export default function AttendanceBoard({
   initialCalendar,
   initialData,
   personalId,
-  bannerAngle,
 }: {
   initialCalendar: ReturnType<typeof calendar>;
   initialData: BoardData | null;
   personalId?: PersonId;
-  bannerAngle: number;
 }) {
   const [office, setOffice] = useState(initialCalendar);
   const [selection, setSelection] = useState<string | null>(null);
@@ -178,7 +187,7 @@ export default function AttendanceBoard({
     <main className="board-shell">
       <h1>Wie is er?</h1>
 
-      <section className="availability" style={{ transform: `rotate(${bannerAngle}deg)` }}
+      <section className="availability" style={{ transform: `rotate(${bannerTilt(date)}deg)` }}
         aria-label={data && provisional ? 'Voorlopige beschikbaarheid' : 'Beschikbaarheid'}
         aria-live="polite">
         {data ? (

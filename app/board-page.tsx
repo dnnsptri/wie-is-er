@@ -9,7 +9,5 @@ export default async function BoardPage({ personalId }: { personalId?: PersonId 
     return null;
   });
 
-  const bannerAngle = (Math.random() < 0.5 ? -1 : 1) * (1 + Math.random() * 1.8);
-
-  return <AttendanceBoard initialCalendar={office} initialData={data} personalId={personalId} bannerAngle={bannerAngle} />;
+  return <AttendanceBoard initialCalendar={office} initialData={data} personalId={personalId} />;
 }

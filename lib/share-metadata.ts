@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import type { Person } from './board';
 
-export const boardTitle = 'Wie is er vandaag bij Backspace';
+export const boardTitle = 'Wie is er vandaag bij Backspace?';
 export const boardDescription = 'Bekijk wie er op kantoor is en hoeveel bureaus er vrij zijn.';
 
 export function shareMetadata(person?: Person): Metadata {

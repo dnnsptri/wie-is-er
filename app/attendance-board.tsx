@@ -90,7 +90,8 @@ export default function AttendanceBoard({
   const expected = roster.filter(({ present }) => present).length;
   const provisional = roster.some(({ unknown }) => unknown);
   const free = Math.max(0, deskCount - expected);
-  const freeLabel = free === 1 ? '1 plek vrij' : `${free} plekken vrij`;
+  const freeLabel = free === 0 ? 'geen vrije plek'
+    : free === 1 ? '1 plek vrij' : `${free} plekken vrij`;
   const selected = roster.find(({ person }) => person.id === (personalId ?? personId));
   const attendanceLabel = selected?.present ? 'Ik ben er niet' : 'Ik ben er';
 

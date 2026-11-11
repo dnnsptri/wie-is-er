@@ -49,7 +49,7 @@ h1 {
   background: #FEF5F7;
   text-align: center;
 }
-.availability strong { font-size: clamp(24px, 7vw, 33px); line-height: 1.05; letter-spacing: -.05em; font-weight: 825; }
+.availability strong { font-size: clamp(24px, 7vw, 33px); line-height: 1.05; letter-spacing: -.05em; font-weight: 725; }
 
 .portraits {
   display: grid;

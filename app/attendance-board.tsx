@@ -88,7 +88,7 @@ export default function AttendanceBoard({
   const provisional = roster.some(({ unknown }) => unknown);
   const free = Math.max(0, deskCount - expected);
   const selected = roster.find(({ person }) => person.id === personId);
-  const attendanceLabel = selected?.present ? 'Ik ben er niet' : 'Ik kom';
+  const attendanceLabel = selected?.present ? 'Ik ben er niet' : 'Ik ben er';
 
   function selectDate(nextDate: string) {
     setSelection(nextDate === office.today ? null : nextDate);

@@ -25,7 +25,12 @@ async function readLocal(): Promise<BoardData> {
 }
 
 async function readBlob() {
-  const result = await get(blobPath, { access: 'private', useCache: false });
+  const result = await get(blobPath, {
+    access: 'private',
+    useCache: false,
+    // A compressed response has a weak ETag, which conditional writes reject.
+    headers: { 'Accept-Encoding': 'identity' },
+  });
   if (!result) return { data: emptyBoard(), etag: undefined };
   if (result.statusCode !== 200) throw new Error('Unable to read attendance data');
   const data: BoardData = await new Response(result.stream).json();

@@ -28,7 +28,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid #805400; outline-
 h1 {
   margin: 0 0 22px;
   text-align: center;
-  font-size: clamp(26px, 8.85vw, 45px);
+  font-size: clamp(26px, 8.85vw, 49px);
   line-height: 1.02;
   letter-spacing: -.05em;
   font-weight: 825;
@@ -43,13 +43,13 @@ h1 {
   width: fit-content;
   max-width: 100%;
   margin-inline: auto;
-  padding: 10px clamp(24px, 7vw, 42px);
+  padding: 10px clamp(12px, 3.5vw, 22px);
   border: 1px solid #fff2b9;
   border-radius: var(--radius);
   background: #FEF5F7;
   text-align: center;
 }
-.availability strong { font-size: clamp(24px, 7vw, 33px); line-height: 1.05; letter-spacing: -.05em; font-weight: 725; }
+.availability strong { font-size: clamp(24px, 7vw, 33px); line-height: 1.05; letter-spacing: -.05em; font-weight: 725; white-space: nowrap; }
 
 .portraits {
   display: grid;
@@ -280,14 +280,14 @@ fieldset input { width: 20px; height: 20px; accent-color: #785300; }
   }
   h1 {
     margin-bottom: 14px;
-    font-size: clamp(26px, 8.3vw, 34px);
+    font-size: clamp(28px, 9vw, 37px);
     line-height: 1.06;
   }
   .availability {
     min-height: 44px;
-    padding: 6px clamp(20px, 6vw, 32px);
+    padding: 6px clamp(10px, 3.5vw, 18px);
   }
-  .availability strong { font-size: clamp(20px, 6vw, 25px); }
+  .availability strong { font-size: min(25px, 6vw); }
   .portraits, .controls {
     width: var(--mobile-board-width);
     margin-inline: auto;
